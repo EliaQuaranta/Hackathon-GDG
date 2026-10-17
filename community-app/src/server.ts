@@ -353,17 +353,31 @@ function broadcast(clients: Set<ServerResponse>, event: string, data: unknown): 
   for (const client of clients) client.write(message);
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+function createConfiguredServer() {
   const operatorKey = process.env.OPERATOR_KEY ?? (process.env.NODE_ENV === "production" ? "" : "demo-lecce");
   if (!operatorKey) throw new Error("Set OPERATOR_KEY before starting in production.");
 
-  const databasePath = process.env.DATABASE_PATH ?? resolve(process.cwd(), "data", "reports.sqlite");
+  // Su Vercel solo /tmp è scrivibile e viene azzerato a ogni cold start.
+  const defaultDatabase = process.env.VERCEL ? "/tmp/reports.sqlite" : resolve(process.cwd(), "data", "reports.sqlite");
+  const databasePath = process.env.DATABASE_PATH ?? defaultDatabase;
   if (databasePath !== ":memory:") mkdirSync(dirname(databasePath), { recursive: true });
-  const server = createMobilityServer({
+  return createMobilityServer({
     databasePath,
     operatorKey,
     projectRoot: resolve(process.cwd(), ".."),
   });
+}
+
+let vercelServer: ReturnType<typeof createMobilityServer> | undefined;
+
+// Entry point richiesto da Vercel: una funzione che riceve ogni richiesta.
+export default function handler(request: IncomingMessage, response: ServerResponse): void {
+  vercelServer ??= createConfiguredServer();
+  vercelServer.emit("request", request, response);
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const server = createConfiguredServer();
   const host = process.env.HOST ?? "127.0.0.1";
   const port = Number(process.env.PORT ?? 4173);
   server.listen(port, host, () => console.log(`Lecce si muove: http://${host}:${port}`));
