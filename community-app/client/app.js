@@ -1,3 +1,124 @@
+const HOME_SESSION_KEY = "lsm-home-entered";
+const BIOMETRIC_CREDENTIAL_KEY = "lsm-biometric-credential";
+const homeScreen = document.getElementById("homeScreen");
+const appShell = document.getElementById("appShell");
+const biometricButton = document.getElementById("biometricEnter");
+const biometricStatus = document.getElementById("biometricStatus");
+const loopbackIpHost = ["127.0.0.1", "[::1]"].includes(location.hostname);
+
+function bytesToBase64Url(bytes) {
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlToBytes(value) {
+  const binary = atob(value.replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function showHome() {
+  sessionStorage.removeItem(HOME_SESSION_KEY);
+  homeScreen.hidden = false;
+  homeScreen.classList.remove("is-leaving");
+  appShell.inert = true;
+  biometricButton.focus();
+}
+
+function enterApp(message) {
+  sessionStorage.setItem(HOME_SESSION_KEY, "1");
+  appShell.inert = false;
+  homeScreen.classList.add("is-leaving");
+  setTimeout(() => {
+    homeScreen.hidden = true;
+    window.dispatchEvent(new Event("resize"));
+  }, 260);
+  if (message) showToast(message);
+}
+
+async function biometricAvailable() {
+  try {
+    return Boolean(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+  } catch {
+    return false;
+  }
+}
+
+// Local MVP gate: the device verifies the user; there is no server-side account or signature check yet.
+async function unlockWithDevice() {
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const storedId = localStorage.getItem(BIOMETRIC_CREDENTIAL_KEY);
+  if (storedId) {
+    await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        allowCredentials: [{ type: "public-key", id: base64UrlToBytes(storedId), transports: ["internal"] }],
+        userVerification: "required",
+        timeout: 60000,
+      },
+    });
+    return "Bentornato! Sblocco biometrico riuscito.";
+  }
+
+  const credential = await navigator.credentials.create({
+    publicKey: {
+      challenge,
+      rp: { name: "Lecce si muove" },
+      user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "cittadino-lecce", displayName: "Cittadino di Lecce" },
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "discouraged" },
+      attestation: "none",
+      timeout: 60000,
+    },
+  });
+  localStorage.setItem(BIOMETRIC_CREDENTIAL_KEY, bytesToBase64Url(new Uint8Array(credential.rawId)));
+  return "Biometria attivata su questo dispositivo. Benvenuto!";
+}
+
+async function setupHome() {
+  if (sessionStorage.getItem(HOME_SESSION_KEY)) {
+    homeScreen.hidden = true;
+    appShell.inert = false;
+  }
+
+  document.getElementById("simpleEnter").addEventListener("click", () => enterApp());
+  document.getElementById("brandHome").addEventListener("click", (event) => {
+    event.preventDefault();
+    showHome();
+  });
+
+  if (loopbackIpHost) {
+    biometricStatus.textContent = "La biometria richiede un nome host: apri l’app su localhost.";
+    biometricButton.addEventListener("click", () => {
+      location.assign(`${location.protocol}//localhost${location.port ? `:${location.port}` : ""}/`);
+    });
+    return;
+  }
+
+  const available = await biometricAvailable();
+  if (!available) {
+    biometricButton.disabled = true;
+    document.getElementById("biometricLabel").textContent = "Biometria non disponibile";
+    biometricStatus.textContent = "Questo dispositivo o browser non offre sblocco biometrico. Usa “Entra nell’app”.";
+    return;
+  }
+  if (localStorage.getItem(BIOMETRIC_CREDENTIAL_KEY)) {
+    document.getElementById("biometricLabel").textContent = "Sblocca con biometria";
+  }
+
+  biometricButton.addEventListener("click", async () => {
+    biometricButton.disabled = true;
+    biometricStatus.textContent = "Conferma con impronta, volto o PIN del dispositivo…";
+    try {
+      enterApp(await unlockWithDevice());
+    } catch {
+      biometricStatus.textContent = "Sblocco annullato o non riuscito. Riprova oppure entra senza biometria.";
+    } finally {
+      biometricButton.disabled = false;
+    }
+  });
+}
+
+setupHome();
+
 const categoryLabels = {
   blocked_cycle_lane: "Pista ciclabile bloccata",
   dangerous_crossing: "Attraversamento pericoloso",
@@ -19,7 +140,7 @@ const networkLayer = L.geoJSON(null, {
     const protectedLane = type.includes("sede protetta") || type.includes("corsia riservata");
     const crossing = type.includes("Attraversamento");
     return {
-      color: protectedLane ? "#16865f" : crossing ? "#d5a137" : "#dc795d",
+      color: protectedLane ? "#1f3a5f" : crossing ? "#8f6114" : "#d9a441",
       weight: crossing ? 2 : 3,
       opacity: 0.78,
       dashArray: feature?.properties?.Stato === "di progetto" ? "5 7" : null,
@@ -70,9 +191,9 @@ function renderPublicReport(report) {
   if (publicReports.has(report.id)) return;
   const marker = L.circleMarker([report.latitude, report.longitude], {
     radius: 8,
-    color: "#ffffff",
-    weight: 2,
-    fillColor: "#137b5c",
+    color: "#d9a441",
+    weight: 3,
+    fillColor: "#1f3a5f",
     fillOpacity: 0.94,
   }).bindPopup(safePopup(`${categoryLabels[report.category] ?? categoryLabels.other} · segnalazione verificata, posizione approssimata`));
   marker.addTo(liveLayer);
@@ -114,7 +235,7 @@ function addSchoolMarker(school) {
     radius: 5,
     color: "#ffffff",
     weight: 1.5,
-    fillColor: "#d5a137",
+    fillColor: "#5b6573",
     fillOpacity: 0.95,
   });
   marker.bindPopup(safePopup(`${school.name} · dato scolastico 2017/18`));
@@ -157,7 +278,7 @@ async function loadBaseline() {
         radius: Math.max(6, Math.min(16, 5 + Math.sqrt(cell.count))),
         color: "#ffffff",
         weight: 1,
-        fillColor: "#e16d53",
+        fillColor: "#c0392b",
         fillOpacity: 0.62,
       });
       circle.bindPopup(safePopup(`${cell.count} incidenti storici aggregati · cella con almeno 5 eventi`));

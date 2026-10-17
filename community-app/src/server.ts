@@ -21,6 +21,7 @@ const clientFiles = new Map<string, [string, string]>([
   ["/manifest.webmanifest", ["manifest.webmanifest", "application/manifest+json"]],
   ["/service-worker.js", ["service-worker.js", "text/javascript; charset=utf-8"]],
   ["/icon.svg", ["icon.svg", "image/svg+xml"]],
+  ["/home-hero.jpg", ["home-hero.jpg", "image/jpeg"]],
 ]);
 
 interface ServerOptions {

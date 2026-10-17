@@ -10,12 +10,13 @@ Requirements: Node.js 24 or later.
 npm start
 ```
 
-Open `http://127.0.0.1:4173`. The local operator demo key is `demo-lecce`. Reports are persisted in a local SQLite file under `data/`; that directory is ignored by Git. Do not expose this local prototype to the public internet.
+Open `http://localhost:4173` (use `localhost`, not `127.0.0.1`, if you want to try the biometric unlock: WebAuthn does not accept IP addresses). The local operator demo key is `demo-lecce`. Reports are persisted in a local SQLite file under `data/`; that directory is ignored by Git. Do not expose this local prototype to the public internet.
 
 Run the API and privacy-flow tests with `npm test`. Run TypeScript checks with `npm run typecheck` after installing the development dependencies with `npm install`.
 
 ## What works
 
+- A home screen recreating the first slide of the pitch deck. Users enter with the device biometric unlock (Windows Hello, Touch ID, Face ID, Android fingerprint via a WebAuthn platform authenticator) or with a simple "Entra nell’app" button. The biometric unlock is a local MVP gate only: the browser verifies the user on the device and no server-side account or signature check exists yet, so it does not protect any data or API.
 - Map layers for the supplied cycle network, school locations, and historical incident concentrations.
 - Incident points are aggregated into approximately one-kilometre cells and cells with fewer than five records are suppressed.
 - Citizens can submit a mobility report with a map location or browser geolocation.

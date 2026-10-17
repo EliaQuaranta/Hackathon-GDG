@@ -109,3 +109,15 @@ test("the same-origin server serves the community app shell", async () => {
   assert.match(response.headers.get("content-type") ?? "", /text\/html/);
   assert.match(await response.text(), /Lecce si muove/);
 });
+
+test("the app shell opens on a home screen with biometric and simple entry", async () => {
+  const html = await (await fetch(`${baseUrl}/`)).text();
+  assert.match(html, /id="homeScreen"/);
+  assert.match(html, /id="biometricEnter"/);
+  assert.match(html, /id="simpleEnter"/);
+
+  const hero = await fetch(`${baseUrl}/home-hero.jpg`);
+  assert.equal(hero.status, 200);
+  assert.equal(hero.headers.get("content-type"), "image/jpeg");
+  assert.ok((await hero.arrayBuffer()).byteLength > 10_000);
+});

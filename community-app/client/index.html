@@ -3,21 +3,34 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#173a32">
+    <meta name="theme-color" content="#1f3a5f">
     <meta name="description" content="Segnala criticità e segui le verifiche per una mobilità più sicura a Lecce.">
     <title>Lecce si muove</title>
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/home-hero.jpg" as="image">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <div class="app-shell">
+    <section class="home-screen" id="homeScreen" aria-labelledby="homeTitle">
+      <div class="home-panel">
+        <p class="home-eyebrow">GDG LECCE 2026 HACKATHON</p>
+        <h1 class="home-title" id="homeTitle">LecceSiMuove</h1>
+        <p class="home-tagline">La città che si muove insieme</p>
+        <p class="home-copy">App social per la mobilità sicura a Lecce</p>
+        <div class="home-actions">
+          <button class="button button-primary home-button" id="biometricEnter" type="button"><i data-lucide="fingerprint"></i><span id="biometricLabel">Accedi con biometria</span></button>
+          <button class="button home-button home-button-secondary" id="simpleEnter" type="button"><span>Entra nell’app</span><i data-lucide="arrow-right"></i></button>
+        </div>
+        <p class="home-status" id="biometricStatus" role="status" aria-live="polite">Impronta o volto restano sul tuo dispositivo: l’app riceve solo l’esito dello sblocco.</p>
+        <p class="home-footnote">Prototipo dimostrativo · Non è un servizio di emergenza: per un pericolo immediato chiama il 112.</p>
+      </div>
+    </section>
+
+    <div class="app-shell" id="appShell" inert>
       <header class="topbar">
-        <a class="brand" href="/" aria-label="Lecce si muove, home">
+        <a class="brand" id="brandHome" href="/" aria-label="Lecce si muove, torna alla home">
           <span class="brand-mark" aria-hidden="true"><img src="/icon.svg" alt=""></span>
           <span class="brand-copy"><strong>Lecce si muove</strong><small>Mobilità, insieme</small></span>
         </a>

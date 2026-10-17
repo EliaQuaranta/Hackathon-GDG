@@ -1,5 +1,5 @@
-const CACHE_NAME = "lecce-si-muove-shell-v2";
-const APP_SHELL = ["/", "/styles.css", "/app.js", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "lecce-si-muove-shell-v3";
+const APP_SHELL = ["/", "/styles.css", "/app.js", "/manifest.webmanifest", "/icon.svg", "/home-hero.jpg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
