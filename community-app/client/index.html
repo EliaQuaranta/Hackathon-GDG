@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#173a32">
+    <meta name="description" content="Segnala criticità e segui le verifiche per una mobilità più sicura a Lecce.">
+    <title>Lecce si muove</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Lecce si muove, home">
+          <span class="brand-mark" aria-hidden="true"><img src="/icon.svg" alt=""></span>
+          <span class="brand-copy"><strong>Lecce si muove</strong><small>Mobilità, insieme</small></span>
+        </a>
+        <div class="topbar-state"><span class="state-dot"></span><span id="connectionLabel">Connessione in corso</span></div>
+        <div class="topbar-actions">
+          <button class="button button-quiet" id="operatorButton" type="button"><i data-lucide="shield-check"></i><span>Operatori</span></button>
+          <button class="button button-primary" id="reportButton" type="button"><i data-lucide="plus"></i><span>Fai una segnalazione</span></button>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <aside class="sidebar" aria-label="Riepilogo mobilità">
+          <div class="sidebar-intro">
+            <p class="eyebrow">LECCE / COMUNITÀ</p>
+            <h1>La città si muove meglio, insieme.</h1>
+            <p class="intro-copy">Condividi una criticità sulla strada. Le segnalazioni vengono verificate prima di comparire sulla mappa pubblica.</p>
+          </div>
+
+          <section class="history-section" aria-labelledby="historyTitle">
+            <div class="section-heading">
+              <div><p class="eyebrow">CONTESTO STORICO</p><h2 id="historyTitle">La rete, oggi</h2></div>
+              <span class="data-year">2013–2023</span>
+            </div>
+            <div class="metrics-row">
+              <div class="metric"><strong id="incidentCount">—</strong><span>incidenti analizzati</span></div>
+              <div class="metric"><strong id="networkCount">—</strong><span>tratti mappati</span></div>
+              <div class="metric"><strong id="schoolCount">—</strong><span>sedi scolastiche*</span></div>
+            </div>
+            <p class="data-footnote">* Sedi da un archivio scolastico 2017/18. La mappa storica non rappresenta il rischio in tempo reale.</p>
+          </section>
+
+          <section class="layers-section" aria-labelledby="layersTitle">
+            <div class="section-heading compact"><div><p class="eyebrow">LIVELLI MAPPA</p><h2 id="layersTitle">Esplora i dati</h2></div></div>
+            <label class="layer-toggle"><span class="layer-symbol symbol-network"></span><span class="layer-label">Rete ciclabile</span><input id="toggleNetwork" type="checkbox" checked><span class="switch" aria-hidden="true"></span></label>
+            <label class="layer-toggle"><span class="layer-symbol symbol-history"></span><span class="layer-label">Concentrazioni storiche</span><input id="toggleHistory" type="checkbox" checked><span class="switch" aria-hidden="true"></span></label>
+            <label class="layer-toggle"><span class="layer-symbol symbol-school"></span><span class="layer-label">Sedi scolastiche</span><input id="toggleSchools" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
+            <div class="map-legend" aria-label="Legenda rete ciclabile">
+              <span><i class="legend-line legend-protected"></i> In sede protetta</span>
+              <span><i class="legend-line legend-shared"></i> Percorso condiviso</span>
+              <span><i class="legend-dot"></i> Incidenti aggregati</span>
+            </div>
+          </section>
+
+          <section class="reports-section" aria-labelledby="reportsTitle">
+            <div class="section-heading compact">
+              <div><p class="eyebrow">AGGIORNAMENTI</p><h2 id="reportsTitle">Segnalazioni verificate</h2></div>
+              <span class="count-badge" id="publicReportCount">0</span>
+            </div>
+            <div class="public-feed" id="publicFeed"><p class="empty-state">Nessuna segnalazione verificata recente. La mappa mostra il contesto storico.</p></div>
+          </section>
+
+          <p class="emergency-note"><i data-lucide="phone-call"></i><span>Per un’emergenza o un pericolo immediato, chiama il <strong>112</strong>. Questa app non è un servizio di emergenza.</span></p>
+        </aside>
+
+        <section class="map-panel" aria-label="Mappa della mobilità di Lecce">
+          <div class="map-topline"><span class="map-label"><i data-lucide="map-pin"></i> Lecce e dintorni</span><span class="map-data-state" id="mapDataState">Caricamento livelli…</span></div>
+          <div id="map" role="application" aria-label="Mappa interattiva, scegli un punto per segnalare una criticità"></div>
+          <div class="map-instruction" id="mapInstruction"><i data-lucide="mouse-pointer-2"></i><span>Attiva “Scegli sulla mappa” per indicare una posizione</span></div>
+          <div class="map-attribution-note">Dati storici aggregati; punti singoli non mostrati.</div>
+        </section>
+      </main>
+
+      <dialog class="dialog report-dialog" id="reportDialog" aria-labelledby="reportDialogTitle">
+        <div class="dialog-heading"><div><p class="eyebrow">CONTRIBUTO CITTADINO</p><h2 id="reportDialogTitle">Segnala una criticità</h2></div><button class="icon-button" data-close="reportDialog" aria-label="Chiudi"><i data-lucide="x"></i></button></div>
+        <p class="dialog-copy">La posizione precisa è visibile solo agli operatori. La mappa pubblica mostra la segnalazione solo dopo la verifica e con posizione approssimata.</p>
+        <form id="reportForm" class="form-stack">
+          <label class="field-label" for="category">Che cosa hai notato?</label>
+          <select id="category" name="category" required>
+            <option value="blocked_cycle_lane">Pista ciclabile bloccata</option>
+            <option value="dangerous_crossing">Attraversamento pericoloso</option>
+            <option value="road_obstacle">Ostacolo sulla strada</option>
+            <option value="collision_or_near_miss">Incidente o quasi incidente</option>
+            <option value="other">Altro problema di mobilità</option>
+          </select>
+          <div class="location-picker">
+            <div><span class="field-label">Dove?</span><p id="selectedLocation">Posizione non ancora scelta</p></div>
+            <div class="location-actions"><button class="button button-outline" id="chooseLocation" type="button"><i data-lucide="map-pin"></i><span>Scegli sulla mappa</span></button><button class="icon-button" id="useLocation" type="button" aria-label="Usa la mia posizione" title="Usa la mia posizione"><i data-lucide="locate-fixed"></i></button></div>
+          </div>
+          <label class="field-label" for="description">Dettagli utili <span class="optional">(non inserire nomi o targhe)</span></label>
+          <textarea id="description" name="description" rows="3" minlength="8" maxlength="400" placeholder="Descrivi il problema in modo concreto…" required></textarea>
+          <p class="form-safety"><i data-lucide="shield-alert"></i>Non usare questa app per chiedere soccorso o segnalare un’emergenza.</p>
+          <button class="button button-primary button-wide" type="submit"><i data-lucide="send"></i><span>Invia per la verifica</span></button>
+        </form>
+      </dialog>
+
+      <dialog class="dialog operator-dialog" id="operatorDialog" aria-labelledby="operatorDialogTitle">
+        <div class="dialog-heading"><div><p class="eyebrow">AREA RISERVATA / DEMO</p><h2 id="operatorDialogTitle">Verifica segnalazioni</h2></div><button class="icon-button" data-close="operatorDialog" aria-label="Chiudi"><i data-lucide="x"></i></button></div>
+        <form id="operatorLoginForm" class="form-stack">
+          <p class="dialog-copy">La coda operatore è solo dimostrativa. Non invia comunicazioni alla Polizia Locale.</p>
+          <label class="field-label" for="operatorKey">Chiave operatore locale</label>
+          <input id="operatorKey" name="key" type="password" autocomplete="current-password" required>
+          <button class="button button-primary button-wide" type="submit"><i data-lucide="lock-keyhole"></i><span>Accedi alla coda</span></button>
+        </form>
+        <section id="operatorQueuePanel" class="operator-queue-panel" hidden>
+          <div class="queue-toolbar"><p class="queue-note">Solo il personale autorizzato dovrebbe accedere a questa coda.</p><button class="button button-quiet" id="operatorLogout" type="button">Esci</button></div>
+          <div id="operatorQueue" class="operator-queue"><p class="empty-state">Nessuna segnalazione in attesa.</p></div>
+        </section>
+      </dialog>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <footer class="app-footer"><span>LECCE SI MUOVE / PROTOTIPO</span><span>OpenStreetMap · Dati storici aggregati · Segnalazioni soggette a verifica</span></footer>
+    </div>
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script defer src="/app.js"></script>
+  </body>
+</html>

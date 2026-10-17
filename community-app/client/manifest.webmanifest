@@ -1,0 +1,18 @@
+{
+  "name": "Lecce si muove",
+  "short_name": "Lecce si muove",
+  "description": "Segnalazioni e mobilità sicura per la comunità di Lecce.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f4ed",
+  "theme_color": "#173a32",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

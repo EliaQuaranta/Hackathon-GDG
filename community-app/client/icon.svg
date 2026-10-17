@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Lecce si muove">
+  <rect width="64" height="64" rx="15" fill="#173a32"/>
+  <path d="M18 45V18h6v21h12v6H18Zm19-17h10v6H37v-6Zm0 10h13v6H37v-6Z" fill="#f7f4e9"/>
+  <circle cx="48" cy="18" r="6" fill="#ef775c"/>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "name": "lecce-mobilita-sicura",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning --experimental-strip-types src/server.ts",
+    "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test tests/report-flow.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.8.1",
+    "typescript": "^5.9.3"
+  }
+}
