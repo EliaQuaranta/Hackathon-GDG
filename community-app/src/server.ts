@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
-import { mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -80,6 +80,7 @@ export function createMobilityServer(options: ServerOptions) {
   const operatorStreams = new Set<ServerResponse>();
   const publicStreams = new Set<ServerResponse>();
   let baseline: ReturnType<typeof loadMobilityBaseline> | undefined;
+  const baselineFile = process.env.BASELINE_PATH ?? resolve(process.cwd(), "data", "baseline.json");
   database.exec(`
     CREATE TABLE IF NOT EXISTS reports (
       id TEXT PRIMARY KEY,
@@ -109,7 +110,9 @@ export function createMobilityServer(options: ServerOptions) {
 
     if (request.method === "GET" && url.pathname === "/api/baseline") {
       try {
-        baseline ??= loadMobilityBaseline(options.projectRoot);
+        baseline ??= existsSync(baselineFile)
+          ? JSON.parse(readFileSync(baselineFile, "utf8"))
+          : loadMobilityBaseline(options.projectRoot);
         sendJson(response, 200, baseline);
       } catch {
         sendJson(response, 503, { error: "Dataset di mobilità non disponibile." });

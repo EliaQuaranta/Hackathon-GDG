@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning --experimental-strip-types src/server.ts",
     "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test tests/report-flow.test.ts",
+    "export-baseline": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/export-baseline.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a custom, no-Fabric community mobility PWA with privacy-filtered historical map layers, report intake, operator verification, and live SSE updates.
 - Added a home screen based on the first slide of the LecceSafe pitch deck, with device biometric unlock (WebAuthn platform authenticator) and a simple entry button for the MVP.
+- Added a Dockerfile for the community app (Node 24, persistent `/data` volume) and an `export-baseline` script that writes a pre-aggregated `data/baseline.json`, so the image does not need the raw customer CSV files. `/api/baseline` now reads that file when present (`BASELINE_PATH` overrides the location).
 
 ### Changed
 
